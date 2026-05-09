@@ -1,0 +1,47 @@
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask files
+instance/
+.webassets-cache
+
+# Local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build / distribution files
+build/
+dist/
+*.egg-info/
+
+# Jupyter notebooks checkpoints, if any
+.ipynb_checkpoints/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

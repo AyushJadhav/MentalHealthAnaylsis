@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Predictions Data</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</head>
+<body>
+    <body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">Mental Health Predictor</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/index' %}active{% endif %}" href="/index">
+                            Prediction Page
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/view_data' %}active{% endif %}" href="/view_data">
+                            View Results
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h1 class="text-center mb-4">User Predictions Data</h1>
+
+        <!-- Data Table -->
+        {% if data %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        {% for key in keys %}
+                        <th scope="col">{{ key }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                    <tr>
+                        {% for key in keys %}
+                        <td>{{ item[key] }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            No data available.
+        </div>
+        {% endif %}
+
+        <!-- Charts -->
+        <div class="row my-5">
+            <div class="col-md-6 mb-4">
+                <canvas id="predictionChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <canvas id="ageChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <canvas id="genderChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <canvas id="workInterfereChart"></canvas>
+            </div>
+            <div class="col-md-12">
+                <canvas id="benefitsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js Config -->
+       <!-- Chart.js Config -->
+    <script>
+        // Prediction Results Chart (Pie)
+        const predictionData = {{ prediction_counts|tojson }};
+        const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+        new Chart(predictionCtx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(predictionData),
+                datasets: [{
+                    data: Object.values(predictionData),
+                    backgroundColor: ['#4caf50', '#f44336'],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Prediction Results Distribution',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} users`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Age Distribution Chart (Bar)
+        const ageData = {{ age_distribution|tojson }};
+        const ageCtx = document.getElementById('ageChart').getContext('2d');
+        new Chart(ageCtx, {
+            type: 'bar',
+            data: {
+                labels: ageData.map(a => `Age ${a}`),
+                datasets: [{
+                    label: 'Number of Users',
+                    data: ageData,
+                    backgroundColor: '#2196f3',
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Age Distribution of Users',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `Age Group ${tooltipItem.label}: ${tooltipItem.raw} users`;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Number of Users' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Age Groups' }
+                    }
+                }
+            }
+        });
+
+        // Gender Distribution Chart (Bar)
+        const genderData = {{ gender_distribution|tojson }};
+        const genderCtx = document.getElementById('genderChart').getContext('2d');
+        new Chart(genderCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(genderData),
+                datasets: [{
+                    label: 'Number of Users',
+                    data: Object.values(genderData),
+                    backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Gender Distribution of Users',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} users`;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Number of Users' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Genders' }
+                    }
+                }
+            }
+        });
+
+        // Work Interference Chart (Polar Area)
+        const workInterfereData = {{ work_interfere_levels|tojson }};
+        const workInterfereCtx = document.getElementById('workInterfereChart').getContext('2d');
+        new Chart(workInterfereCtx, {
+            type: 'polarArea',
+            data: {
+                labels: Object.keys(workInterfereData),
+                datasets: [{
+                    data: Object.values(workInterfereData),
+                    backgroundColor: ['#3f51b5', '#ff9800', '#00bcd4', '#cddc39'],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Work Interference Levels',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} users`;
+                            }
+                        }
+                    }
+                },
+                responsive: true
+            }
+        });
+
+        // Benefits vs Prediction Chart (Stacked Bar)
+        const benefitsData = {{ benefits_vs_prediction|tojson }};
+        const benefitsCtx = document.getElementById('benefitsChart').getContext('2d');
+        new Chart(benefitsCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(benefitsData),
+                datasets: Object.keys(predictionData).map(pred => ({
+                    label: pred,
+                    data: Object.values(benefitsData).map(b => b[pred]),
+                    backgroundColor: pred === 'Needs Treatment' ? '#ff5722' : '#8bc34a'
+                }))
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Benefits vs Prediction Results',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} users`;
+                            }
+                        }
+                    },
+                    legend: { display: true, position: 'top' }
+                },
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: { display: true, text: 'Benefits Offered' }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: { display: true, text: 'Number of Users' }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
