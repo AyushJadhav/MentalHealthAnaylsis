@@ -70,7 +70,7 @@ def init_db():
     except Exception as e:
         print(f"Error initializing PostgreSQL database: {e}")
         
-        
+init_db()        
 # Load your pre-trained model
 model = joblib.load('rfmodel.pkl')
 
@@ -376,5 +376,4 @@ def predict():
 
 if __name__ == '__main__':
     #app.run(host='0.0.0.0', port=5000, debug=True)
-    init_db()
     app.run(host='127.0.0.1', port=8080, debug=True)
